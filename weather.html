@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            
+        }
+        div {
+            border: 1px solid black;
+            align-items: center;
+            justify-content: center;
+            padding:20px;
+            text-align: center;
+            background-color: lightblue;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: #0abda2;
+        }
+    </style>
+</head>
+<body>
+    <div>
+    <p>Weather Data</p>
+    <button onclick="loc()">Get Weather Temperature</button>
+    <p id="a"></p>
+    </div>
+</body>
+<script>
+    function loc() {
+        document.getElementById('a').innerText = "Loading...";
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                let latitude=pos.coords.latitude;
+                let longitude=pos.coords.longitude;
+                fetch("https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&current_weather=true")
+                .then(res=>res.json())
+                .then(data=>{
+                    let a=data.current_weather.temperature;
+                    // alert(a);
+                    document.getElementById('a').innerText = `Current Temperature: ${a}°C`;
+                });
+            },
+            function() {
+                document.getElementById('a').innerText = "Unable to retrieve location.";
+            }
+        )
+    }
+</script>
+</html>
