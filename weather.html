@@ -47,8 +47,9 @@
                 .then(res=>res.json())
                 .then(data=>{
                     let a=data.current_weather.temperature;
+                    let b=data.current_weather.windspeed;
                     // alert(a);
-                    document.getElementById('a').innerText = `Current Temperature: ${a}°C`;
+                    document.getElementById('a').innerText = `Current Temperature: ${a}°C\n\nWind Speed: ${b} km/h`;
                 });
             },
             function() {
