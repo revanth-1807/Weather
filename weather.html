@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+html{
+    background:url("background.jpg") center center/cover no-repeat fixed;
+    background-color:#0f172a;
+}
+
+body{
+    min-height:100vh;
+    padding:20px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:30px;
+
+    color:white;
+}
+
+.weather-card{
+    width:min(400px,90vw);
+    padding:30px;
+
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:20px;
+
+    box-shadow:0 8px 32px rgba(0,0,0,0.3);
+
+    text-align:center;
+    transition:0.3s;
+}
+
+.weather-card:hover{
+    transform:translateY(-5px);
+}
+
+.weather-card h2{
+    margin-bottom:20px;
+    font-size:28px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+
+    border:none;
+    outline:none;
+    border-radius:10px;
+
+    background:rgba(255,255,255,0.2);
+    color:white;
+    font-size:16px;
+}
+
+input::placeholder{
+    color:rgba(255,255,255,0.8);
+}
+
+button{
+    width:100%;
+    padding:12px;
+
+    border:none;
+    border-radius:10px;
+
+    background:linear-gradient(135deg,#00c6ff,#0072ff);
+
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.03);
+}
+
+.result{
+    margin-top:20px;
+    font-size:18px;
+    line-height:1.8;
+    white-space:pre-line;
+}
+
+.title{
+    text-align:center;
+    font-size:42px;
+    text-shadow:0 3px 10px rgba(0,0,0,0.5);
+}
+
+@media(max-width:500px){
+    .title{
+        font-size:32px;
+    }
+
+    .weather-card{
+        padding:20px;
+    }
+}
+</style>
+</head>
+<h1 class="title">🌦 Weather App</h1>
+<div class="weather-card">
+    <h2>Current Location</h2>
+    <button onclick="loc()">Get Weather</button>
+    <p id="a" class="result"></p>
+</div>
+<div class="weather-card">
+    <h2>Search City</h2>
+    <form onsubmit="loc1(); return false;">
+        <input
+            type="text"
+            id="city"
+            placeholder="Enter city name"
+            required
+        >
+        <button type="submit">
+            Search Weather
+        </button>
+    </form>
+    <p id="b" class="result"></p>
+</div>
+<script>
+    async function loc1() {
+    document.getElementById("b").innerText = "Loading...";
+    try {
+        let city = document.getElementById("city").value.trim();
+        let geoRes = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${city}`
+        );
+        let geoData = await geoRes.json();
+        if (!geoData.results || geoData.results.length === 0) {
+            document.getElementById("b").innerText = "City not found.";
+            return;
+        }
+        let lat = geoData.results[0].latitude;
+        let lon = geoData.results[0].longitude;
+        let weatherRes = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+        );
+        let weatherData = await weatherRes.json();
+        document.getElementById("b").innerText =
+            `City: ${geoData.results[0].name}\n\nTemperature: ${weatherData.current_weather.temperature}°C\n\nWind Speed: ${weatherData.current_weather.windspeed} km/h`;
+
+    } catch (err) {
+        document.getElementById("b").innerText = "Error fetching weather.";
+        console.log(err);
+    }
+}
+    async function loc() {
+        document.getElementById('a').innerText = "Loading...";
+        navigator.geolocation.getCurrentPosition(
+            async function(pos) {
+                let latitude=pos.coords.latitude;
+                let longitude=pos.coords.longitude;
+            
+                let data=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&current_weather=true")
+                data=await data.json();
+                document.getElementById('a').innerText = "Temperature: " + data.current_weather.temperature + "°C\n\nWind Speed: " + data.current_weather.windspeed + " km/h";
+            },
+            function() {
+                document.getElementById('a').innerText = "Unable to retrieve location.";
+            }
+        )
+    }
+</script>
+</html>
